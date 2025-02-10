@@ -1,6 +1,23 @@
-import { boolean, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
+import "server-only";
+
+import {
+  boolean,
+  pgEnum,
+  pgTable,
+  text,
+  timestamp,
+  uuid,
+} from "drizzle-orm/pg-core";
 import { authenticatedRole, authUid, crudPolicy } from "drizzle-orm/neon";
 import { sql } from "drizzle-orm";
+
+export const categories = pgEnum("categories", [
+  "landscape",
+  "human",
+  "animal",
+  "car",
+  "undefined",
+]);
 
 export const images = pgTable(
   "images",
@@ -9,8 +26,8 @@ export const images = pgTable(
     userId: text()
       .notNull()
       .default(sql`(auth.user_id())`),
-    url: text("url").notNull(),
-    category: text("category").notNull(),
+    url: text("url").notNull().unique(),
+    category: categories().notNull(),
     correctCategory: boolean("correct_category"),
     createdAt: timestamp("created_at").notNull().defaultNow(),
     updatedAt: timestamp("updated_at")

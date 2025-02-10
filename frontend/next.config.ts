@@ -9,6 +9,12 @@ const nextConfig: NextConfig = {
         port: "",
         search: "",
       },
+      {
+        protocol: "https",
+        hostname: "cplabr2.conblem.me",
+        port: "",
+        search: "",
+      },
     ],
   },
 };
