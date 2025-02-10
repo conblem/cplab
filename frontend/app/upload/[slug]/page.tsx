@@ -9,14 +9,7 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import Header from "@/components/header";
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import Image from "next/image";
+import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import ResponsiveImage from "@/components/responsive-image";
 
 export default async function CategorizeImage({
@@ -59,11 +52,9 @@ export default async function CategorizeImage({
         <CardHeader>
           <CardTitle>Categorize Image</CardTitle>
         </CardHeader>
-        <CardContent id="card-content" className="flex-1 overflow-auto w-fit">
-          <img src={`https://cplabr2.conblem.me/${image.url}`}></img>
-        </CardContent>
-        {/*<ResponsiveImage*/}
-        {/*></ResponsiveImage>*/}
+        <ResponsiveImage
+          src={`https://cplabr2.conblem.me/${image.url}`}
+        ></ResponsiveImage>
       </Card>
       {/*<CardFooter>*/}
       {/*  <h2>{image.category}</h2>*/}
