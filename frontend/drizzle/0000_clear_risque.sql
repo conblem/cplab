@@ -1,11 +1,13 @@
+CREATE TYPE "public"."categories" AS ENUM('landscape', 'human', 'animal', 'car', 'undefined');--> statement-breakpoint
 CREATE TABLE "images" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"userId" text DEFAULT (auth.user_id()) NOT NULL,
 	"url" text NOT NULL,
-	"category" text NOT NULL,
+	"category" "categories" NOT NULL,
 	"correct_category" boolean,
 	"created_at" timestamp DEFAULT now() NOT NULL,
-	"updated_at" timestamp NOT NULL
+	"updated_at" timestamp NOT NULL,
+	CONSTRAINT "images_url_unique" UNIQUE("url")
 );
 --> statement-breakpoint
 ALTER TABLE "images" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
