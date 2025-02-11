@@ -2,6 +2,7 @@ CREATE TYPE "public"."categories" AS ENUM('landscape', 'human', 'animal', 'car',
 CREATE TABLE "images" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"userId" text DEFAULT (auth.user_id()) NOT NULL,
+	"email" text NOT NULL,
 	"url" text NOT NULL,
 	"category" "categories" NOT NULL,
 	"correct_category" boolean,
