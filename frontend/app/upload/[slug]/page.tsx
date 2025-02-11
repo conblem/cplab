@@ -61,37 +61,35 @@ export default async function CategorizeImage({
           <ResponsiveImage
             src={`https://cplabr2.conblem.me/${image.url}`}
           ></ResponsiveImage>
-          <CardFooter>Footer</CardFooter>
+          <CardFooter>
+            <h2>{image.category}</h2>
+            <form
+              action={async () => {
+                "use server";
+                // todo: use authenticated db
+                await db
+                  .update(images)
+                  .set({ correctCategory: true })
+                  .where(eq(images.id, slug));
+              }}
+            >
+              <button type="submit">Correct</button>
+            </form>
+            <form
+              action={async () => {
+                "use server";
+                // todo: use authenticated db
+                await db
+                  .update(images)
+                  .set({ correctCategory: false })
+                  .where(eq(images.id, slug));
+              }}
+            >
+              <button type="submit">Incorrect</button>
+            </form>
+          </CardFooter>
         </Card>
       </div>
-      {/*<CardFooter>*/}
-      {/*  <h2>{image.category}</h2>*/}
-      {/*  <form*/}
-      {/*    action={async () => {*/}
-      {/*      "use server";*/}
-      {/*      // todo: use authenticated db*/}
-      {/*      await ownerDb*/}
-      {/*        .update(images)*/}
-      {/*        .set({ correctCategory: true })*/}
-      {/*        .where(eq(images.id, slug));*/}
-      {/*    }}*/}
-      {/*  >*/}
-      {/*    <button type="submit">Correct</button>*/}
-      {/*  </form>*/}
-      {/*  <form*/}
-      {/*    action={async () => {*/}
-      {/*      "use server";*/}
-      {/*      // todo: use authenticated db*/}
-      {/*      await ownerDb*/}
-      {/*        .update(images)*/}
-      {/*        .set({ correctCategory: false })*/}
-      {/*        .where(eq(images.id, slug));*/}
-      {/*    }}*/}
-      {/*  >*/}
-      {/*    <button type="submit">Incorrect</button>*/}
-      {/*  </form>*/}
-      {/*</CardFooter>*/}
-      {/*</Card>*/}
     </div>
   );
 }
