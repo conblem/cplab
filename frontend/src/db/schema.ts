@@ -1,5 +1,3 @@
-import "server-only";
-
 import {
   boolean,
   pgEnum,
@@ -26,7 +24,8 @@ export const images = pgTable(
     userId: text()
       .notNull()
       .default(sql`(auth.user_id())`),
-    url: text("url").notNull().unique(),
+    email: text().notNull(),
+    url: text().notNull().unique(),
     category: categories().notNull(),
     correctCategory: boolean("correct_category"),
     createdAt: timestamp("created_at").notNull().defaultNow(),

@@ -15,9 +15,9 @@ export default function Image({ src }: { src: string }) {
     <CardContent
       style={ratio ? { aspectRatio: ratio } : {}}
       id="card-content"
-      className="p-0"
+      className="p-0 h-full overflow-hidden"
     >
-      <img ref={ratioCallback} src={src}></img>
+      <img className="h-full w-auto" ref={ratioCallback} src={src}></img>
     </CardContent>
   );
 }

@@ -13,19 +13,23 @@ const DATABASE_AUTHENTICATED_URL = databaseUrl
     "authenticated",
   );
 
-const sql = neon(DATABASE_AUTHENTICATED_URL, {
-  authToken: async () => {
-    const session = await auth();
-    if (!session || !("jwt" in session) || typeof session.jwt !== "string") {
-      throw new Error("No jwt");
-    }
-    // we extract the jwt from the session and pass it to the database
-    // using neon authorize the database can use the jwt to authenticate the user
-    // thus allowing rls to work, pretty nifty
-    return session.jwt;
-  },
+// we extract the jwt from the session and pass it to the database
+// using neon authorize the database can use the jwt to authenticate the user
+// thus allowing rls to work, pretty nifty
+export async function getJWT() {
+  const session = await auth();
+  if (!session || !("jwt" in session) || typeof session.jwt !== "string") {
+    throw new Error("No jwt");
+  }
+  return session.jwt;
+}
+
+export const db = drizzle({
+  client: neon(DATABASE_AUTHENTICATED_URL, {
+    authToken: getJWT,
+  }),
+  schema,
 });
-export const db = drizzle({ client: sql, schema });
 export const ownerDb = drizzle({
   client: neon(process.env.DATABASE_URL!),
   schema,
