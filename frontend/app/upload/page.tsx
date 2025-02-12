@@ -1,7 +1,6 @@
 "use client";
 
-import { useDropzone } from "react-dropzone";
-import { useCallback, useState } from "react";
+import { useState } from "react";
 import { FileUpload } from "@/components/fileupload";
 import { useRouter } from "next/navigation";
 import {
@@ -10,42 +9,45 @@ import {
   BreadcrumbLink,
   BreadcrumbList,
 } from "@/components/ui/breadcrumb";
+import Header from "@/components/header";
+import Dropzone from "shadcn-dropzone";
+import { Card, CardContent } from "@/components/ui/card";
 
 export default function Upload() {
   const router = useRouter();
   const [file, setFile] = useState<File>();
-  const onDrop = useCallback((acceptedFiles: File[]) => {
-    setFile(acceptedFiles[0]);
-  }, []);
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({
-    onDrop,
-    maxFiles: 1,
-  });
   return (
-    <>
-      <Breadcrumb>
-        <BreadcrumbList>
-          <BreadcrumbItem>
-            <BreadcrumbLink>Upload</BreadcrumbLink>
-          </BreadcrumbItem>
-        </BreadcrumbList>
-      </Breadcrumb>
-      {file && (
-        <FileUpload
-          file={file}
-          uploaded={(id) => {
-            router.push(`/upload/${id}`);
-          }}
-        ></FileUpload>
-      )}
-      <div {...getRootProps()}>
-        <input {...getInputProps()} />
-        {isDragActive ? (
-          <p>Drop the files here ...</p>
+    <div className="w-full h-full flex flex-col">
+      <Header>
+        <Breadcrumb>
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink>Upload</BreadcrumbLink>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
+      </Header>
+      <div className="flex-1 overflow-auto p-4 flex flex-col items-center justify-center">
+        {file ? (
+          <FileUpload
+            file={file}
+            onClose={() => setFile(undefined)}
+            uploaded={(id) => {
+              router.push(`/upload/${id}`);
+            }}
+          ></FileUpload>
         ) : (
-          <p>Drag drop some files here, or click to select files</p>
+          <Card className="">
+            <CardContent id="card-content" className="pt-6">
+              <Dropzone
+                containerClassName="h-50 w-100 items-center justify-center"
+                maxFiles={1}
+                onDrop={(files: File[]) => setFile(files[0])}
+              ></Dropzone>
+            </CardContent>
+          </Card>
         )}
       </div>
-    </>
+    </div>
   );
 }

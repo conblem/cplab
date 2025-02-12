@@ -31,7 +31,7 @@ export default async function CategorizeImage({
   }
 
   return (
-    <div id="image-categorizer" className="w-full h-full">
+    <>
       <Header>
         <Breadcrumb>
           <BreadcrumbList>
@@ -49,24 +49,21 @@ export default async function CategorizeImage({
       </Header>
       <div
         id="card-centerer"
-        className="w-full h-[calc(100%-(var(--spacing)*16))] relative"
+        className="w-full h-full flex flex-col items-center p-4 overflow-x-hidden"
       >
         <Card
           id="card"
-          className="absolute inset-0 ml-auto mr-auto max-h-full max-w-full w-fit h-full grid grid-rows-[auto_1fr_auto]"
+          className="relative max-w-full max-h-full flex flex-col"
         >
-          <CardHeader>
-            <CardTitle>Categorize Image</CardTitle>
-          </CardHeader>
-          <ResponsiveImage
+          <img
+            className="rounded-lg h-full"
             src={`https://cplabr2.conblem.me/${image.url}`}
-          ></ResponsiveImage>
-          <CardFooter>
+          ></img>
+          <CardFooter className="absolute bottom-0 right-0 left-0 bg-white p-6 rounded-bl-lg rounded-br-lg">
             <h2>{image.category}</h2>
             <form
               action={async () => {
                 "use server";
-                // todo: use authenticated db
                 await db
                   .update(images)
                   .set({ correctCategory: true })
@@ -78,7 +75,6 @@ export default async function CategorizeImage({
             <form
               action={async () => {
                 "use server";
-                // todo: use authenticated db
                 await db
                   .update(images)
                   .set({ correctCategory: false })
@@ -90,6 +86,6 @@ export default async function CategorizeImage({
           </CardFooter>
         </Card>
       </div>
-    </div>
+    </>
   );
 }
