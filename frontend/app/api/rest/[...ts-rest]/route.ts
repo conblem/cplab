@@ -2,7 +2,7 @@ import { createNextHandler } from "@ts-rest/serverless/next";
 import { contract } from "./contract";
 import { db, ownerDb } from "@/src/db/db";
 import { images } from "@/src/db/schema";
-import { eq, isNotNull } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { render } from "@react-email/render";
 import NotionMagicLink from "@/react-email-starter/emails/notion-magic-link";
 import { Resend } from "resend";
@@ -36,16 +36,20 @@ const handler = createNextHandler(
       }
 
       const addresses = await ownerDb
-        .selectDistinct({ email: images.email })
+        .select({
+          email: images.email,
+          trueCount: sql<number>`COUNT(*) FILTER (WHERE ${images.correctCategory} IS TRUE)`,
+          falseCount: sql<number>`COUNT(*) FILTER (WHERE ${images.correctCategory} IS FALSE)`,
+        })
         .from(images)
-        .where(isNotNull(images.correctCategory));
+        .groupBy(images.email);
 
       const html = await render(NotionMagicLink({ loginCode: "1234" }));
 
       const mails = addresses.map((address) => ({
         from: "CPLAB <mail@cplab.conblem.me>",
         to: address.email,
-        subject: "Daily Statistics",
+        subject: `Daily Statistics: ${address.trueCount} ${address.falseCount}`,
         html,
       }));
 
