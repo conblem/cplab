@@ -15,6 +15,8 @@ import {
 } from "@/components/ui/sidebar";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
+import React from "react";
 
 interface NavigationProps {
   username?: string | null;
@@ -22,6 +24,7 @@ interface NavigationProps {
 }
 
 export function Navigation({ username, children }: NavigationProps) {
+  const path = usePathname();
   return (
     <SidebarProvider className="w-screen h-screen">
       <Sidebar>
@@ -31,17 +34,20 @@ export function Navigation({ username, children }: NavigationProps) {
             <SidebarGroupContent>
               <SidebarMenu>
                 <SidebarMenuItem>
-                  <SidebarMenuButton asChild>
+                  <SidebarMenuButton
+                    asChild
+                    isActive={path.startsWith("/upload")}
+                  >
                     <Link href="/upload">Upload</Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
                 <SidebarMenuItem>
-                  <SidebarMenuButton asChild>
+                  <SidebarMenuButton asChild isActive={path === "/archive"}>
                     <Link href="/archive">Archive</Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
                 <SidebarMenuItem>
-                  <SidebarMenuButton asChild>
+                  <SidebarMenuButton asChild isActive={path === "/statistic"}>
                     <Link href="/statistic">Statistic</Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -53,9 +59,15 @@ export function Navigation({ username, children }: NavigationProps) {
           <SidebarMenu>
             <SidebarMenuItem>
               <SidebarMenuButton asChild>
-                <Avatar>
-                  <AvatarFallback>{username}</AvatarFallback>
-                </Avatar>
+                <a
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  href={`${process.env.NEXT_PUBLIC_ZITADEL_ISSUER}/ui/console/users/me`}
+                >
+                  <Avatar className="w-full">
+                    <AvatarFallback>{username}</AvatarFallback>
+                  </Avatar>
+                </a>
               </SidebarMenuButton>
             </SidebarMenuItem>
           </SidebarMenu>
