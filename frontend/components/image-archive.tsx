@@ -23,7 +23,7 @@ export default function ImageArchive({
             id="footer"
             className="flex space-x-2 absolute bottom-0 left-0 bg-white rounded-tr-lg rounded-bl-lg pt-6 group-hover:opacity-0 transition-opacity duration-100 ease-in"
           >
-            <Label>Category: {image.category}</Label>
+            <Label className="capitalize">Category: {image.category}</Label>
             <Checkbox checked={image.correctCategory!} />
           </CardFooter>
           {/* eslint-disable-next-line @next/next/no-img-element */}

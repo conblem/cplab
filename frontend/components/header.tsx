@@ -3,6 +3,7 @@
 import { useSidebar } from "./ui/sidebar";
 import { PanelLeftIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import React from "react";
 
 export default function Header({ children }: { children: React.ReactNode }) {
   const { toggleSidebar } = useSidebar();
