@@ -8,6 +8,7 @@ import {
   BreadcrumbList,
 } from "@/components/ui/breadcrumb";
 import Header from "@/components/header";
+import DonutChartLabelExample from "@/components/statistic";
 
 export const dynamic = "force-dynamic";
 
@@ -31,6 +32,7 @@ export default async function Statistic() {
           </BreadcrumbList>
         </Breadcrumb>
       </Header>
+      <DonutChartLabelExample />
       {statistics.map((statistic, i) => (
         <div key={i}>
           {statistic.correctCategory!.toString()} {statistic.count}

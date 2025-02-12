@@ -11,6 +11,10 @@ const rekognitionClient = new RekognitionClient({
   },
 });
 
+function includes(labels: (string | undefined)[], ...tests: string[]) {
+  return tests.some((test) => labels.includes(test));
+}
+
 export default async function categorize(url: string) {
   const req = await fetch(url);
 
@@ -26,8 +30,17 @@ export default async function categorize(url: string) {
   const lowerCaseLabels =
     labels?.Labels?.map((label) => label.Name?.toLowerCase()) ?? [];
 
-  if (lowerCaseLabels.includes("person") || lowerCaseLabels.includes("human")) {
+  if (includes(lowerCaseLabels, "human", "person")) {
     return "human";
+  }
+  if (includes(lowerCaseLabels, "dog", "cat", "animal", "bird")) {
+    return "animal";
+  }
+  if (includes(lowerCaseLabels, "car", "vehicle", "truck")) {
+    return "car";
+  }
+  if (includes(lowerCaseLabels, "landscape", "nature", "outdoors", "forest")) {
+    return "landscape";
   }
   return "undefined";
 }

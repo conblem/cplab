@@ -5,7 +5,7 @@ import { Progress } from "@/components/ui/progress";
 import client from "@/src/client";
 import { Card, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { X } from "lucide-react";
+import { LoaderIcon, X } from "lucide-react";
 
 async function getSignedUrl() {
   const res = await client.presignImage();
@@ -71,6 +71,9 @@ export function FileUpload({
       </Button>
       <CardFooter className="absolute bottom-0 left-0 right-0 rounded-br-lg rounded-bl-lg bg-white p-2">
         <Button onClick={upload}>Upload</Button>
+        {progress != undefined && progress != 100 && (
+          <LoaderIcon className="animate-spin" />
+        )}
       </CardFooter>
       {progress !== undefined && (
         <Progress
@@ -79,6 +82,7 @@ export function FileUpload({
           className="*:bg-black rounded-lg absolute bottom-0 left-0 right-0"
         ></Progress>
       )}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
       <img className="rounded-lg h-full" ref={img} src={url} alt="Upload" />
     </Card>
   );
