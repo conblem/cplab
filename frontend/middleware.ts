@@ -7,7 +7,8 @@ export const config = {
 };
 
 export default auth(async (req) => {
+  // if user is not authenticated, redirect to log in
   if (!req.auth) {
-    return Response.redirect(new URL("/api/auth/signin", req.url));
+    return Response.redirect(new URL("/api/login", req.url));
   }
 });

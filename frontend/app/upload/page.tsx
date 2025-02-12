@@ -40,6 +40,8 @@ export default function Upload() {
           <Card className="">
             <CardContent id="card-content" className="pt-6">
               <Dropzone
+                maxSize={4 * 1024 * 1024}
+                accept={{ "image/jpeg": [] }}
                 containerClassName="h-50 w-100 items-center justify-center"
                 maxFiles={1}
                 onDrop={(files: File[]) => setFile(files[0])}

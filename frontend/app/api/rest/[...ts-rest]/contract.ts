@@ -54,17 +54,4 @@ export const contract = c.router({
     },
     body: z.object({ url: z.string().url() }),
   },
-  cleanupImage: {
-    method: "POST",
-    path: "/api/rest/cleanup-image",
-    responses: {
-      200: z.string().nullable(),
-    },
-    headers: z.object({
-      ["upstash-signature"]: z.string(),
-    }),
-    body: z.object({
-      url: z.string().uuid(),
-    }),
-  },
 });

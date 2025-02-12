@@ -47,8 +47,8 @@ export function Navigation({ username, children }: NavigationProps) {
                   </SidebarMenuButton>
                 </SidebarMenuItem>
                 <SidebarMenuItem>
-                  <SidebarMenuButton asChild isActive={path === "/statistic"}>
-                    <Link href="/statistic">Statistic</Link>
+                  <SidebarMenuButton asChild isActive={path === "/statistics"}>
+                    <Link href="/statistics">Statistics</Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               </SidebarMenu>
