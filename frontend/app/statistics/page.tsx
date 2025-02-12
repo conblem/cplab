@@ -1,6 +1,3 @@
-import { images } from "@/src/db/schema";
-import { and, count, eq, isNotNull, sql } from "drizzle-orm";
-import { db } from "@/src/db/db";
 import {
   Breadcrumb,
   BreadcrumbItem,
