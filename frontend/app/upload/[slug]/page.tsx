@@ -8,8 +8,7 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import Header from "@/components/header";
-import { Card, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import ResponsiveImage from "@/components/responsive-image";
+import { Card, CardFooter } from "@/components/ui/card";
 import Link from "next/link";
 import { db } from "@/src/db/db";
 
