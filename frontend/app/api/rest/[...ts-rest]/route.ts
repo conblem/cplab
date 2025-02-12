@@ -2,27 +2,72 @@ import { createNextHandler } from "@ts-rest/serverless/next";
 import { contract } from "./contract";
 import { db, ownerDb } from "@/src/db/db";
 import { images } from "@/src/db/schema";
-import { eq, sql } from "drizzle-orm";
-import { render } from "@react-email/render";
-import NotionMagicLink from "@/react-email-starter/emails/notion-magic-link";
-import { Resend } from "resend";
+import { count, isNotNull, sql } from "drizzle-orm";
+import { CreateBatchOptions, Resend } from "resend";
 import { AwsClient } from "aws4fetch";
-import { Client as QStash, Receiver } from "@upstash/qstash";
 import { auth } from "@/auth";
 import { v4 as uuid } from "uuid";
 import categorize from "./categorize";
+import Email from "@/react-email-starter/emails/email";
+
+async function getUsersStatistic() {
+  return ownerDb
+    .select({
+      email: images.email,
+      correct: sql<number>`COUNT(*) FILTER (WHERE ${images.correctCategory} IS TRUE)`,
+      incorrect: sql<number>`COUNT(*) FILTER (WHERE ${images.correctCategory} IS FALSE)`,
+    })
+    .from(images)
+    .groupBy(images.email);
+}
+
+async function getOverallStatistic() {
+  const overallStatistic = await ownerDb
+    .select({
+      correctCategory: images.correctCategory,
+      count: count(images.id),
+    })
+    .from(images)
+    .where(isNotNull(images.correctCategory))
+    .groupBy(images.correctCategory);
+
+  const overallCorrect =
+    overallStatistic.find((statistic) => statistic.correctCategory === true)
+      ?.count ?? 0;
+
+  const overallIncorrect =
+    overallStatistic.find((statistic) => statistic.correctCategory === false)
+      ?.count ?? 0;
+
+  return { overallCorrect, overallIncorrect };
+}
+
+async function emails(): Promise<CreateBatchOptions> {
+  const usersStatistic = await getUsersStatistic();
+  const { overallCorrect, overallIncorrect } = await getOverallStatistic();
+
+  return usersStatistic.map((userStatistic) => ({
+    from: "CPLAB <mail@cplab.conblem.me>",
+    to: userStatistic.email,
+    subject: "Your Daily Statistics",
+    react: Email({
+      userCorrect: userStatistic.correct,
+      userIncorrect: userStatistic.incorrect,
+      overallCorrect,
+      overallIncorrect,
+    }),
+  }));
+}
 
 const resend = new Resend(process.env.RESEND_KEY);
-const receiver = new Receiver({
-  currentSigningKey: process.env.QSTASH_CURRENT_SIGNING_KEY!,
-  nextSigningKey: process.env.QSTASH_NEXT_SIGNING_KEY!,
-});
-const qstash = new QStash({ token: process.env.QSTASH_TOKEN! });
 const awsClient = new AwsClient({
   accessKeyId: process.env.R2_ACCESS_KEY_ID!,
   secretAccessKey: process.env.R2_ACCESS_KEY!,
 });
+
 const PRESIGN_EXPIRY_SECONDS = 30;
+// 4mb
+const MAX_IMAGE_SIZE = 4 * 1024 * 1024;
 
 const handler = createNextHandler(
   contract,
@@ -35,25 +80,7 @@ const handler = createNextHandler(
         };
       }
 
-      const addresses = await ownerDb
-        .select({
-          email: images.email,
-          trueCount: sql<number>`COUNT(*) FILTER (WHERE ${images.correctCategory} IS TRUE)`,
-          falseCount: sql<number>`COUNT(*) FILTER (WHERE ${images.correctCategory} IS FALSE)`,
-        })
-        .from(images)
-        .groupBy(images.email);
-
-      const html = await render(NotionMagicLink({ loginCode: "1234" }));
-
-      const mails = addresses.map((address) => ({
-        from: "CPLAB <mail@cplab.conblem.me>",
-        to: address.email,
-        subject: `Daily Statistics: ${address.trueCount} ${address.falseCount}`,
-        html,
-      }));
-
-      const res = await resend.batch.send(mails);
+      const res = await resend.batch.send(await emails());
       return { status: res.error ? 500 : 200, body: res };
     },
     presignImage: async () => {
@@ -78,20 +105,6 @@ const handler = createNextHandler(
         },
       );
 
-      // upstash can only call public urls
-      // if you have a public available url you can use this to trigger the PATCH
-      if (process.env.VERCEL_URL) {
-        await qstash.publishJSON({
-          // don't hard code url
-          url: `https://${process.env.VERCEL_URL}/api/rest/cleanup-image`,
-          method: "POST",
-          delay: PRESIGN_EXPIRY_SECONDS * 2,
-          body: {
-            url: id,
-          },
-        });
-      }
-
       return {
         status: 200,
         body: {
@@ -111,7 +124,21 @@ const handler = createNextHandler(
       const url = new URL(body.url);
       const uuid = url.pathname.replace("/cplab/", "");
 
-      const category = await categorize(`https://cplabr2.conblem.me/${uuid}`);
+      const req = await fetch(`https://cplabr2.conblem.me/${uuid}`);
+      const contentType = req.headers.get("content-type");
+      if (!contentType || contentType !== "image/jpeg") {
+        throw new Error("Invalid content type");
+      }
+      const contentLength = req.headers.get("content-length");
+      if (!contentLength || parseInt(contentLength) > MAX_IMAGE_SIZE) {
+        throw new Error("Image too large");
+      }
+      const bytes = await req.bytes();
+      if (bytes[0] !== 0xff || bytes[1] !== 0xd8) {
+        throw new Error("Invalid image");
+      }
+
+      const category = await categorize(bytes);
       const res = await db
         .insert(images)
         .values({
@@ -125,46 +152,6 @@ const handler = createNextHandler(
         body: {
           id: res[0].id,
         },
-      };
-    },
-    cleanupImage: async (
-      { headers: { ["upstash-signature"]: signature }, body: { url } },
-      { nextRequest },
-    ) => {
-      const isValid = await receiver.verify({
-        body: await nextRequest.clone().text(),
-        signature,
-      });
-      if (!isValid) {
-        return {
-          status: 401,
-          body: null,
-        };
-      }
-
-      const image = await ownerDb.query.images.findFirst({
-        where: eq(images.url, url),
-      });
-
-      if (image) {
-        return {
-          status: 200,
-          body: null,
-        };
-      }
-
-      // if image has not been added by now we delete the uploaded file from s3
-      // so we don't have any orphaned files
-      const deleteImage = await awsClient.sign(
-        `${process.env.R2_ENDPOINT}/${url}`,
-        {
-          method: "DELETE",
-        },
-      );
-      const res = await fetch(deleteImage);
-      return {
-        status: 200,
-        body: await res.text(),
       };
     },
   },

@@ -15,13 +15,11 @@ function includes(labels: (string | undefined)[], ...tests: string[]) {
   return tests.some((test) => labels.includes(test));
 }
 
-export default async function categorize(url: string) {
-  const req = await fetch(url);
-
+export default async function categorize(image: Uint8Array) {
   const labels = await rekognitionClient.send(
     new DetectLabelsCommand({
       Image: {
-        Bytes: await req.bytes(),
+        Bytes: image,
       },
       MaxLabels: 10,
       MinConfidence: 70,
