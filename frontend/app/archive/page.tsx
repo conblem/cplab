@@ -10,6 +10,8 @@ import {
 import Header from "@/components/header";
 import { desc } from "drizzle-orm";
 
+export const dynamic = "force-dynamic";
+
 export default async function Archive() {
   // auth is handled by rls so this component cannot be misused
   // as the user has to be authenticated to access this component

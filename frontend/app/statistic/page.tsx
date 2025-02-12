@@ -9,6 +9,8 @@ import {
 } from "@/components/ui/breadcrumb";
 import Header from "@/components/header";
 
+export const dynamic = "force-dynamic";
+
 export default async function Statistic() {
   const statistics = await db
     .select({
