@@ -128,7 +128,7 @@ const handler = createNextHandler(
       { nextRequest },
     ) => {
       const isValid = await receiver.verify({
-        body: await nextRequest.text(),
+        body: await nextRequest.clone().text(),
         signature,
       });
       if (!isValid) {
