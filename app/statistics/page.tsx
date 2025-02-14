@@ -36,7 +36,7 @@ export default async function Statistics() {
         <Breadcrumb>
           <BreadcrumbList>
             <BreadcrumbItem>
-              <BreadcrumbLink>Statistics</BreadcrumbLink>
+              <BreadcrumbLink>Statistic</BreadcrumbLink>
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
